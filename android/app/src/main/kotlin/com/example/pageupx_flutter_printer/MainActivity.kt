@@ -7,7 +7,10 @@ import com.example.pageupx_flutter_printer.zebra.ZebraPrinterHelperImpl
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class MainActivity: FlutterActivity() {
@@ -19,8 +22,7 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             if (call.method == "print"){
                 // Launch activity scope
-
-                runBlocking {
+                CoroutineScope(Dispatchers.IO).launch {
                     val values = mapOf(
                         2 to "2 Hello World!",
                         3 to "3 Hello World!",
@@ -32,6 +34,7 @@ class MainActivity: FlutterActivity() {
                     printerHelper.loadTemplate("48:A4:93:D5:3B:C7", PrinterTemplates.Content.IN)
                     delay(1000)
                     printerHelper.print("48:A4:93:D5:3B:C7", "In.ZPL", values)
+                    result.success(null)
                 }
             }
         }

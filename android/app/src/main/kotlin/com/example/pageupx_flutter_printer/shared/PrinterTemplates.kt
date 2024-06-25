@@ -3,7 +3,7 @@ package com.example.pageupx_flutter_printer.shared
 object PrinterTemplates {
 
     object Content {
-        
+
         const val IN =
             "^DFR:In.ZPL^FS\n" +
                     "~TA000\n" +
