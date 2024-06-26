@@ -1,6 +1,7 @@
 package fr.pageup.pageupx_printer
 
 import androidx.annotation.NonNull
+import com.zebra.sdk.comm.ConnectionException
 import fr.pageup.pageupx_printer.shared.PrinterHelper
 import fr.pageup.pageupx_printer.zebra.ZebraPrinterHelperImpl
 
@@ -27,6 +28,10 @@ class PageupxPrinterPlugin: FlutterPlugin, MethodCallHandler {
     private val templateNameParameter = "template_name"
     private val valuesParameter = "values"
 
+    // Ok -> -1
+    // UnknownException -> 0
+    // ConnectionException -> 1
+
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "pageupx_printer")
@@ -34,29 +39,32 @@ class PageupxPrinterPlugin: FlutterPlugin, MethodCallHandler {
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
-        if (call.method == "print_configuration"){
-            CoroutineScope(Dispatchers.IO).launch {
-                val macAddress = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
-                printerHelper.printConfiguration(macAddress)
-                result.success(null)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                if (call.method == "print_configuration"){
+                    val macAddress = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
+                    printerHelper.printConfiguration(macAddress)
+                    result.success(-1)
+                }
+                else if (call.method == "load_template"){
+                    val macAddress = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
+                    val template = call.argument<String>(templateParameter) ?: throw NullPointerException(templateParameter)
+                    printerHelper.loadTemplate(macAddress, template)
+                    result.success(-1)
+                }
+                else if (call.method == "print"){
+                    val macAddress = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
+                    val templateName = call.argument<String>(templateNameParameter) ?: throw NullPointerException(templateNameParameter)
+                    val values = call.argument<Map<Int, String>>(valuesParameter) ?: throw NullPointerException(valuesParameter)
+                    printerHelper.print(macAddress, templateName, values)
+                    result.success(-1)
+                }
             }
-        }
-        else if (call.method == "load_template"){
-            CoroutineScope(Dispatchers.IO).launch {
-                val macAddress = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
-                val template = call.argument<String>(templateParameter) ?: throw NullPointerException(templateParameter)
-                printerHelper.loadTemplate(macAddress, template)
-                result.success(null)
+            catch (e : ConnectionException){
+                result.success(1)
             }
-        }
-        else if (call.method == "print"){
-            // Launch activity scope
-            CoroutineScope(Dispatchers.IO).launch {
-                val macAddress = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
-                val templateName = call.argument<String>(templateNameParameter) ?: throw NullPointerException(templateNameParameter)
-                val values = call.argument<Map<Int, String>>(valuesParameter) ?: throw NullPointerException(valuesParameter)
-                printerHelper.print(macAddress, templateName, values)
-                result.success(null)
+            catch (e : Exception){
+                result.success(0)
             }
         }
     }

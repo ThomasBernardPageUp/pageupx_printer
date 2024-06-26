@@ -25,6 +25,8 @@ class ZebraPrinterHelperImpl(
     private val blackMark = "^XA\n" + "^MNM,24\n"
     private val autoSpacer = "^XA\n" + "^MNW\n"
 
+
+
     override fun getPrinters() : Flow<List<Printer>> = callbackFlow {
 //        BluetoothDiscoverer.findPrinters(context, object : DiscoveryHandler {
 //            val discoveredPrinters: MutableList<DiscoveredPrinter> = mutableListOf()
@@ -47,7 +49,7 @@ class ZebraPrinterHelperImpl(
         awaitClose()
     }
 
-    override suspend fun printConfiguration(address: MacAddress) = withContext(ioDispatcher) {
+    override suspend fun printConfiguration(address: MacAddress) {
         val connection = BluetoothConnection(address)
         connection.open()
         val zebraPrinter = ZebraPrinterFactory.getInstance(connection)
@@ -55,7 +57,7 @@ class ZebraPrinterHelperImpl(
         connection.close()
     }
 
-    override suspend fun loadTemplate(address: MacAddress, template: String) = withContext(ioDispatcher) {
+    override suspend fun loadTemplate(address: MacAddress, template: String) {
         val connection = BluetoothConnection(address)
         connection.open()
         val zebraPrinter = ZebraPrinterFactory.getInstance(connection)
@@ -63,7 +65,7 @@ class ZebraPrinterHelperImpl(
         connection.close()
     }
 
-    override suspend fun print(address: MacAddress, template: String, values: Map<Int, String>) = withContext(ioDispatcher) {
+    override suspend fun print(address: MacAddress, template: String, values: Map<Int, String>) {
         val connection = BluetoothConnection(address)
         connection.open()
         val zebraPrinter = ZebraPrinterFactory.getInstance(connection)

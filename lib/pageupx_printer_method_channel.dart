@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:pageupx_printer/exceptions/connection_exception.dart';
 
 import 'pageupx_printer_platform_interface.dart';
 
@@ -14,25 +15,43 @@ class MethodChannelPageupxPrinter extends PageupxPrinterPlatform {
   final _templateNameParameter = "template_name";
   final _valuesParameter = "values";
 
+  // Throw exception if needed
+  parseResult(int result) {
+    switch (result) {
+      case -1: // OK
+        break;
+      case 0:
+        throw Exception();
+      case 1:
+        throw ConnectionException();
+    }
+  }
+
   @override
   Future printConfiguration(String macAddress) async {
-    await methodChannel.invokeMethod(
+    var result = await methodChannel.invokeMethod<int>(
         "print_configuration", {_macAddressParameter: macAddress});
+
+    parseResult(result!);
   }
 
   @override
   Future loadTemplate(String macAddress, String template) async {
-    await methodChannel.invokeMethod("load_template",
+    var result = await methodChannel.invokeMethod<int>("load_template",
         {_macAddressParameter: macAddress, _templateParameter: template});
+
+    parseResult(result!);
   }
 
   @override
   Future print(
       String macAddress, String templateName, Map<int, String> values) async {
-    await methodChannel.invokeMethod("print", {
+    var result = await methodChannel.invokeMethod<int>("print", {
       _macAddressParameter: macAddress,
       _templateNameParameter: templateName,
       _valuesParameter: values
     });
+
+    parseResult(result!);
   }
 }
