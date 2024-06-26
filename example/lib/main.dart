@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:core';
 
 import 'package:flutter/services.dart';
 import 'package:nfc_manager/nfc_manager.dart';
@@ -8,7 +7,11 @@ import 'package:pageupx_printer/exceptions/connection_exception.dart';
 import 'package:pageupx_printer/pageupx_printer.dart';
 import 'package:pageupx_printer_example/template.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   runApp(const MyApp());
 }
 
@@ -25,6 +28,7 @@ class _MyAppState extends State<MyApp> {
       GlobalKey<ScaffoldMessengerState>();
   bool _loading = false;
   bool _scanning = false;
+  String _address = "";
 
   void _setLoading(bool loading) {
     setState(() {
@@ -35,6 +39,12 @@ class _MyAppState extends State<MyApp> {
   void _setScanningNfc(bool scanning) {
     setState(() {
       _scanning = scanning;
+    });
+  }
+
+  void _setAddress(String address) {
+    setState(() {
+      _address = address;
     });
   }
 
@@ -57,6 +67,92 @@ class _MyAppState extends State<MyApp> {
     setState(() {});
   }
 
+  Future<void> _loadTemplate() async {
+    try {
+      _setLoading(true);
+      await _pageupxPrinterPlugin.loadTemplate(_address, Constants.IN);
+    } on ConnectionException {
+      _showSnackBar("Can't connect to printer : $_address");
+    } catch (e) {
+      _showSnackBar("An error occurred");
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _printTemplate() async {
+    try {
+      _setLoading(true);
+      var values = {
+        1: "1234567890",
+        2: "1234567890",
+        3: "1234567890",
+        4: "1234567890",
+        5: "1234567890",
+      };
+      await _pageupxPrinterPlugin.print(_address, "In.ZPL", values);
+    } on ConnectionException {
+      _showSnackBar("Can't connect to printer : $_address");
+    } catch (e) {
+      _showSnackBar("An error occurred");
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _startNfcScan() async {
+    _setAddress("");
+    _setScanningNfc(true);
+    NfcManager.instance.startSession(
+      onDiscovered: (NfcTag tag) async {
+        print(tag.data);
+
+        var ndef = tag.data['ndef'];
+        if (ndef == null) {
+          _stopNfcScan();
+          return;
+        }
+
+        var cachedMessage = ndef['cachedMessage'];
+        if (cachedMessage == null) {
+          _stopNfcScan();
+          return;
+        }
+
+        var records = cachedMessage['records'];
+        if (records == null || records.isEmpty) {
+          _stopNfcScan();
+          return;
+        }
+
+        for (var record in records) {
+          var payload = record['payload'];
+          if (payload == null || payload.isEmpty) continue;
+
+          String url = String.fromCharCodes(payload.skip(1));
+          print("NFC Tag contains URL: $url");
+
+          final regex = RegExp(r"mB=([a-zA-Z0-9]+)");
+          final match = regex.firstMatch(url);
+          if (match != null) {
+            String address = match.group(1) ?? "Not found";
+            print("NFC Tag address: $address");
+            _setAddress(address);
+          } else {
+            _showSnackBar("NFC Tag address not found");
+          }
+        }
+
+        _stopNfcScan();
+      },
+    );
+  }
+
+  void _stopNfcScan() {
+    NfcManager.instance.stopSession();
+    _setScanningNfc(false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -77,115 +173,27 @@ class _MyAppState extends State<MyApp> {
                   crossAxisCount: 2,
                   children: [
                     OutlinedButton(
-                      onPressed: _loading
-                          ? null
-                          : () async {
-                              try {
-                                _setLoading(true);
-                                await _pageupxPrinterPlugin.loadTemplate(
-                                    "48:A4:93:D5:3B:C7", Constants.IN);
-                              } on ConnectionException {
-                                _showSnackBar("Can't connect to printer");
-                              } catch (e) {
-                                _showSnackBar("An error occurred");
-                              } finally {
-                                _setLoading(false);
-                              }
-                            },
+                      onPressed:
+                          _address.isEmpty || _loading ? null : _loadTemplate,
                       child: const Text("Load template"),
                     ),
                     OutlinedButton(
-                      onPressed: _loading
-                          ? null
-                          : () async {
-                              try {
-                                _setLoading(true);
-                                var values = {
-                                  1: "1234567890",
-                                  2: "1234567890",
-                                  3: "1234567890",
-                                  4: "1234567890",
-                                  5: "1234567890",
-                                };
-                                await _pageupxPrinterPlugin.print(
-                                    "48:A4:93:D5:3B:C7", "In.ZPL", values);
-                              } on ConnectionException {
-                                _showSnackBar("Can't connect to printer");
-                              } catch (e) {
-                                _showSnackBar("An error occurred");
-                              } finally {
-                                _setLoading(false);
-                              }
-                            },
+                      onPressed:
+                          _address.isEmpty || _loading ? null : _printTemplate,
                       child: const Text("Print template"),
                     ),
                     OutlinedButton(
-                      onPressed: _scanning
-                          ? null
-                          : () async {
-                              _setScanningNfc(true);
-                              NfcManager.instance.startSession(
-                                onDiscovered: (NfcTag tag) async {
-                                  // Do something with an NfcTag instance.
-                                  print(tag.data);
-
-                                  // Extract the NDEF message
-                                  var ndef = tag.data['ndef'];
-                                  if (ndef != null) {
-                                    var cachedMessage = ndef['cachedMessage'];
-                                    if (cachedMessage != null) {
-                                      var records = cachedMessage['records'];
-                                      if (records != null &&
-                                          records.isNotEmpty) {
-                                        for (var record in records) {
-                                          var payload = record['payload'];
-                                          if (payload != null &&
-                                              payload.length > 0) {
-                                            // Convert payload to string and skip the first byte (language code)
-                                            String url = String.fromCharCodes(
-                                                payload.skip(1));
-                                            print("NFC Tag contains URL: $url");
-
-                                            // Extract the address using a regular expression
-                                            final regex =
-                                                RegExp(r"mB=([a-zA-Z0-9]+)");
-                                            final match = regex.firstMatch(url);
-                                            if (match != null) {
-                                              String address =
-                                                  match.group(1) ?? "Not found";
-                                              _showSnackBar(
-                                                  "NFC Tag address: $address");
-                                              print(
-                                                  "NFC Tag address: $address");
-                                            } else {
-                                              _showSnackBar(
-                                                  "NFC Tag address not found");
-                                            }
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-
-                                  NfcManager.instance.stopSession();
-                                  _setScanningNfc(false);
-                                },
-                              );
-                            },
+                      onPressed: _scanning ? null : _startNfcScan,
                       child: const Text("Start Scan printer with NFC"),
                     ),
                     OutlinedButton(
-                      onPressed: !_scanning
-                          ? null
-                          : () async {
-                              NfcManager.instance.stopSession();
-                              _setScanningNfc(false);
-                            },
+                      onPressed: !_scanning ? null : _stopNfcScan,
                       child: const Text("Stop NFC"),
                     ),
                   ],
                 ),
               ),
+              Text("Current printer: $_address"),
             ],
           ),
         ),
