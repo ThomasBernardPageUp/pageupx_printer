@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:pageupx_printer/exceptions/bluetooth_disabled_exception.dart';
+import 'package:pageupx_printer/exceptions/bluetooth_not_supported_exception.dart';
 import 'package:pageupx_printer/exceptions/connection_exception.dart';
 
 import 'pageupx_printer_platform_interface.dart';
@@ -24,6 +26,10 @@ class MethodChannelPageupxPrinter extends PageupxPrinterPlatform {
         throw Exception();
       case 1:
         throw ConnectionException();
+      case 2:
+        throw BluetoothNotSupportedException();
+      case 3:
+        throw BluetoothDisabledException();
     }
   }
 

@@ -1,18 +1,20 @@
 package fr.pageup.pageupx_printer
 
-import androidx.annotation.NonNull
+import android.bluetooth.BluetoothAdapter
+import android.util.Log
 import com.zebra.sdk.comm.ConnectionException
+import fr.pageup.pageupx_printer.shared.BluetoothDisabledException
+import fr.pageup.pageupx_printer.shared.BluetoothNotSupportedException
 import fr.pageup.pageupx_printer.shared.PrinterHelper
 import fr.pageup.pageupx_printer.zebra.ZebraPrinterHelperImpl
-
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import io.flutter.plugin.common.MethodChannel.Result
 
 /** PageupxPrinterPlugin */
 class PageupxPrinterPlugin: FlutterPlugin, MethodCallHandler {
@@ -22,6 +24,7 @@ class PageupxPrinterPlugin: FlutterPlugin, MethodCallHandler {
     /// when the Flutter Engine is detached from the Activity
     private lateinit var channel : MethodChannel
     private val printerHelper : PrinterHelper = ZebraPrinterHelperImpl()
+    private val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
     private val macAddressParameter = "mac_address"
     private val templateParameter = "template"
@@ -31,6 +34,8 @@ class PageupxPrinterPlugin: FlutterPlugin, MethodCallHandler {
     // Ok -> -1
     // UnknownException -> 0
     // ConnectionException -> 1
+    // BluetoothDisabledException -> 2
+    // BluetoothNotSupported -> 3
 
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -41,7 +46,17 @@ class PageupxPrinterPlugin: FlutterPlugin, MethodCallHandler {
     override fun onMethodCall(call: MethodCall, result: Result) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                if (call.method == "print_configuration"){
+                // Check bluetooth connectivity
+                if (mBluetoothAdapter == null)
+                    throw BluetoothNotSupportedException()
+                else if (!mBluetoothAdapter.isEnabled)
+                    throw BluetoothNotSupportedException()
+
+                if (call.method == "get_printers"){
+                    val printers = printerHelper.getPrinters()
+                    result.success(printers)
+                }
+                else if (call.method == "print_configuration"){
                     val macAddress = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
                     printerHelper.printConfiguration(macAddress)
                     result.success(-1)
@@ -60,10 +75,21 @@ class PageupxPrinterPlugin: FlutterPlugin, MethodCallHandler {
                     result.success(-1)
                 }
             }
+
             catch (e : ConnectionException){
+                Log.e(e.message, e.stackTraceToString())
                 result.success(1)
             }
+            catch (e : BluetoothDisabledException){
+                Log.e(e.message, e.stackTraceToString())
+                result.success(2)
+            }
+            catch (e : BluetoothNotSupportedException){
+                Log.e(e.message, e.stackTraceToString())
+                result.success(3)
+            }
             catch (e : Exception){
+                Log.e(e.message, e.stackTraceToString())
                 result.success(0)
             }
         }

@@ -3,6 +3,8 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:nfc_manager/nfc_manager.dart';
+import 'package:pageupx_printer/exceptions/bluetooth_disabled_exception.dart';
+import 'package:pageupx_printer/exceptions/bluetooth_not_supported_exception.dart';
 import 'package:pageupx_printer/exceptions/connection_exception.dart';
 import 'package:pageupx_printer/pageupx_printer.dart';
 import 'package:pageupx_printer_example/template.dart';
@@ -71,6 +73,10 @@ class _MyAppState extends State<MyApp> {
     try {
       _setLoading(true);
       await _pageupxPrinterPlugin.loadTemplate(_address, Constants.IN);
+    } on BluetoothNotSupportedException {
+      _showSnackBar("Bluetooth not supported");
+    } on BluetoothDisabledException {
+      _showSnackBar("Bluetooth disbled");
     } on ConnectionException {
       _showSnackBar("Can't connect to printer : $_address");
     } catch (e) {
@@ -90,7 +96,12 @@ class _MyAppState extends State<MyApp> {
         4: "1234567890",
         5: "1234567890",
       };
+      // We ca
       await _pageupxPrinterPlugin.print(_address, "In.ZPL", values);
+    } on BluetoothNotSupportedException {
+      _showSnackBar("Bluetooth not supported");
+    } on BluetoothDisabledException {
+      _showSnackBar("Bluetooth disbled");
     } on ConnectionException {
       _showSnackBar("Can't connect to printer : $_address");
     } catch (e) {
