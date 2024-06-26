@@ -16,6 +16,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  nfc_manager: ^3.5.0
 
   pageupx_printer:
     # When depending on this package from a real application you should use:

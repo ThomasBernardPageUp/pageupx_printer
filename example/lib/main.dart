@@ -60,46 +60,56 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              FloatingActionButton(
-                onPressed: () async {
-                  try {
-                    _setLoading(true);
-                    await _pageupxPrinterPlugin.loadTemplate(
-                        "48:A4:93:D5:3B:C7", Constants.IN);
-                  } on ConnectionException {
-                    _showSnackBar("Can't connect to printer");
-                  } catch (e) {
-                    _showSnackBar("An error occurred");
-                  } finally {
-                    _setLoading(false);
-                  }
-                },
-                child: const Text("Load template"),
-              ),
-              FloatingActionButton(
-                onPressed: () async {
-                  try {
-                    _setLoading(true);
-                    var values = {
-                      1: "1234567890",
-                      2: "1234567890",
-                      3: "1234567890",
-                      4: "1234567890",
-                      5: "1234567890",
-                    };
-                    await _pageupxPrinterPlugin.print(
-                        "48:A4:93:D5:3B:C7", "In.ZPL", values);
-                  } on ConnectionException {
-                    _showSnackBar("Can't connect to printer");
-                  } catch (e) {
-                    _showSnackBar("An error occurred");
-                  } finally {
-                    _setLoading(false);
-                  }
-                },
-                child: const Text("Print template"),
-              ),
-              if (_loading) CircularProgressIndicator(),
+              Expanded(
+                  child: GridView.count(
+                padding: const EdgeInsets.all(20),
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                crossAxisCount: 2,
+                children: [
+                  OutlinedButton(
+                      onPressed: _loading
+                          ? null
+                          : () async {
+                              try {
+                                _setLoading(true);
+                                await _pageupxPrinterPlugin.loadTemplate(
+                                    "48:A4:93:D5:3B:C7", Constants.IN);
+                              } on ConnectionException {
+                                _showSnackBar("Can't connect to printer");
+                              } catch (e) {
+                                _showSnackBar("An error occurred");
+                              } finally {
+                                _setLoading(false);
+                              }
+                            },
+                      child: const Text("Load template")),
+                  OutlinedButton(
+                      onPressed: _loading
+                          ? null
+                          : () async {
+                              try {
+                                _setLoading(true);
+                                var values = {
+                                  1: "1234567890",
+                                  2: "1234567890",
+                                  3: "1234567890",
+                                  4: "1234567890",
+                                  5: "1234567890",
+                                };
+                                await _pageupxPrinterPlugin.print(
+                                    "48:A4:93:D5:3B:C7", "In.ZPL", values);
+                              } on ConnectionException {
+                                _showSnackBar("Can't connect to printer");
+                              } catch (e) {
+                                _showSnackBar("An error occurred");
+                              } finally {
+                                _setLoading(false);
+                              }
+                            },
+                      child: const Text("Print template")),
+                ],
+              )),
             ],
           ),
         ),
