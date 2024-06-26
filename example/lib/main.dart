@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:core';
 
 import 'package:flutter/services.dart';
+import 'package:nfc_manager/nfc_manager.dart';
 import 'package:pageupx_printer/exceptions/connection_exception.dart';
 import 'package:pageupx_printer/pageupx_printer.dart';
 import 'package:pageupx_printer_example/template.dart';
@@ -22,10 +24,17 @@ class _MyAppState extends State<MyApp> {
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
   bool _loading = false;
+  bool _scanning = false;
 
   void _setLoading(bool loading) {
     setState(() {
       _loading = loading;
+    });
+  }
+
+  void _setScanningNfc(bool scanning) {
+    setState(() {
+      _scanning = scanning;
     });
   }
 
@@ -61,13 +70,13 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Expanded(
-                  child: GridView.count(
-                padding: const EdgeInsets.all(20),
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                crossAxisCount: 2,
-                children: [
-                  OutlinedButton(
+                child: GridView.count(
+                  padding: const EdgeInsets.all(20),
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  crossAxisCount: 2,
+                  children: [
+                    OutlinedButton(
                       onPressed: _loading
                           ? null
                           : () async {
@@ -83,8 +92,9 @@ class _MyAppState extends State<MyApp> {
                                 _setLoading(false);
                               }
                             },
-                      child: const Text("Load template")),
-                  OutlinedButton(
+                      child: const Text("Load template"),
+                    ),
+                    OutlinedButton(
                       onPressed: _loading
                           ? null
                           : () async {
@@ -107,9 +117,75 @@ class _MyAppState extends State<MyApp> {
                                 _setLoading(false);
                               }
                             },
-                      child: const Text("Print template")),
-                ],
-              )),
+                      child: const Text("Print template"),
+                    ),
+                    OutlinedButton(
+                      onPressed: _scanning
+                          ? null
+                          : () async {
+                              _setScanningNfc(true);
+                              NfcManager.instance.startSession(
+                                onDiscovered: (NfcTag tag) async {
+                                  // Do something with an NfcTag instance.
+                                  print(tag.data);
+
+                                  // Extract the NDEF message
+                                  var ndef = tag.data['ndef'];
+                                  if (ndef != null) {
+                                    var cachedMessage = ndef['cachedMessage'];
+                                    if (cachedMessage != null) {
+                                      var records = cachedMessage['records'];
+                                      if (records != null &&
+                                          records.isNotEmpty) {
+                                        for (var record in records) {
+                                          var payload = record['payload'];
+                                          if (payload != null &&
+                                              payload.length > 0) {
+                                            // Convert payload to string and skip the first byte (language code)
+                                            String url = String.fromCharCodes(
+                                                payload.skip(1));
+                                            print("NFC Tag contains URL: $url");
+
+                                            // Extract the address using a regular expression
+                                            final regex =
+                                                RegExp(r"mB=([a-zA-Z0-9]+)");
+                                            final match = regex.firstMatch(url);
+                                            if (match != null) {
+                                              String address =
+                                                  match.group(1) ?? "Not found";
+                                              _showSnackBar(
+                                                  "NFC Tag address: $address");
+                                              print(
+                                                  "NFC Tag address: $address");
+                                            } else {
+                                              _showSnackBar(
+                                                  "NFC Tag address not found");
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+
+                                  NfcManager.instance.stopSession();
+                                  _setScanningNfc(false);
+                                },
+                              );
+                            },
+                      child: const Text("Start Scan printer with NFC"),
+                    ),
+                    OutlinedButton(
+                      onPressed: !_scanning
+                          ? null
+                          : () async {
+                              NfcManager.instance.stopSession();
+                              _setScanningNfc(false);
+                            },
+                      child: const Text("Stop NFC"),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
