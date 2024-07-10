@@ -1,4 +1,4 @@
-class Constants {
+class Template {
   static const IN = "^DFR:In.ZPL^FS\n" +
       "~TA000\n" +
       "~JSN\n" +

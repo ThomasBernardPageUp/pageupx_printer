@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> _loadTemplate() async {
     try {
       _setLoading(true);
-      await _pageupxPrinterPlugin.loadTemplate(_address, Constants.IN);
+      await _pageupxPrinterPlugin.loadTemplate(_address, Template.IN);
     } on BluetoothNotSupportedException {
       _showSnackBar("Bluetooth not supported");
     } on BluetoothDisabledException {
@@ -160,7 +160,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _stopNfcScan() {
-    NfcManager.instance.stopSession();
+    NfcManager.instance.stopSession(
+        alertMessage: "Scan stopped", errorMessage: "On coupe tout");
     _setScanningNfc(false);
   }
 
