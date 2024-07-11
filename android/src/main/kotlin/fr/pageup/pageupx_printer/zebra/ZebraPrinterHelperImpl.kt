@@ -6,6 +6,7 @@ import com.zebra.sdk.printer.ZebraPrinter
 import com.zebra.sdk.printer.ZebraPrinterFactory
 import fr.pageup.pageupx_printer.shared.MacAddress
 import fr.pageup.pageupx_printer.shared.PrinterHelper
+import kotlinx.coroutines.delay
 
 class ZebraPrinterHelperImpl : PrinterHelper {
 
@@ -43,6 +44,8 @@ class ZebraPrinterHelperImpl : PrinterHelper {
                 sendCommand(blackMark + it)
             }
         }
+        // Wait for the printer to be ready
+        delay(300)
     }
 
     override suspend fun print(address: MacAddress, template: String, values: Map<Int, String>) {

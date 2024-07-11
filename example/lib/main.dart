@@ -266,112 +266,113 @@ class _MyAppState extends State<MyApp> {
                   height: 4,
                   color: Colors.transparent,
                 ),
-              Row(
-                children: [
-                  OutlinedButton(
-                    onPressed: _address.isEmpty || _loading
-                        ? null
-                        : () {
-                            _loadTemplate(Template.IN);
-                          },
-                    child: const Text("Load template IN"),
-                  ),
-                  OutlinedButton(
-                    onPressed: _address.isEmpty || _loading
-                        ? null
-                        : () {
-                            _loadTemplate(Template.OUT);
-                          },
-                    child: const Text("Load template OUT"),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  OutlinedButton(
-                    onPressed: _address.isEmpty || _loading
-                        ? null
-                        : () {
-                            _loadTemplate(Template.DISPATCH);
-                          },
-                    child: const Text("Load template DISPATCH"),
-                  ),
-                  OutlinedButton(
-                    onPressed: _address.isEmpty || _loading
-                        ? null
-                        : () {
-                            _loadTemplate(Template.FORWARD);
-                          },
-                    child: const Text("Load template FORWARD"),
-                  ),
-                ],
-              ),
+              SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      OutlinedButton(
+                        onPressed: _address.isEmpty || _loading
+                            ? null
+                            : () {
+                                _loadTemplate(Template.IN);
+                              },
+                        child: const Text("Load template IN"),
+                      ),
+                      OutlinedButton(
+                        onPressed: _address.isEmpty || _loading
+                            ? null
+                            : () {
+                                _loadTemplate(Template.OUT);
+                              },
+                        child: const Text("Load template OUT"),
+                      ),
+                      OutlinedButton(
+                        onPressed: _address.isEmpty || _loading
+                            ? null
+                            : () {
+                                _loadTemplate(Template.DISPATCH);
+                              },
+                        child: const Text("Load template DISPATCH"),
+                      ),
+                      OutlinedButton(
+                        onPressed: _address.isEmpty || _loading
+                            ? null
+                            : () {
+                                _loadTemplate(Template.FORWARD);
+                              },
+                        child: const Text("Load template FORWARD"),
+                      ),
+                    ],
+                  )),
               OutlinedButton(
                 onPressed: _address.isEmpty || _loading ? null : _loadTemplates,
                 child: const Text("Load all templates"),
               ),
-              Row(
-                children: [
-                  OutlinedButton(
-                    onPressed: _address.isEmpty || _loading
-                        ? null
-                        : () {
-                            var values = {
-                              1: "1234567891",
-                              2: "1234567892",
-                              3: "1234567893",
-                              4: "1234567894",
-                              5: "1234567895",
-                            };
-                            _printTemplate("In.ZPL", values);
-                          },
-                    child: const Text("Print IN"),
-                  ),
-                  OutlinedButton(
-                    onPressed: _address.isEmpty || _loading
-                        ? null
-                        : () {
-                            var values = {
-                              1: "1234567891",
-                              2: "1234567892",
-                              3: "1234567893",
-                              4: "1234567894",
-                            };
-                            _printTemplate("Out.ZPL", values);
-                          },
-                    child: const Text("Print OUT"),
-                  ),
-                  OutlinedButton(
-                    onPressed: _address.isEmpty || _loading
-                        ? null
-                        : () {
-                            var values = {
-                              1: "1234567891",
-                              2: "1234567892",
-                              3: "1234567893",
-                              4: "1234567894",
-                              5: "1234567895",
-                            };
-                            _printTemplate("Forward.ZPL", values);
-                          },
-                    child: const Text("Print Forward"),
-                  ),
-                  OutlinedButton(
-                    onPressed: _address.isEmpty || _loading
-                        ? null
-                        : () {
-                            var values = {
-                              1: "1234567891",
-                              2: "1234567892",
-                              3: "1234567893",
-                              4: "1234567894",
-                              5: "1234567895",
-                            };
-                            _printTemplate("Dispatch.ZPL", values);
-                          },
-                    child: const Text("Print Dispatch"),
-                  )
-                ],
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    OutlinedButton(
+                      onPressed: _address.isEmpty || _loading
+                          ? null
+                          : () {
+                              var values = {
+                                1: "1234567891",
+                                2: "1234567892",
+                                3: "1234567893",
+                                4: "1234567894",
+                                5: "1234567895",
+                              };
+                              _printTemplate("In.ZPL", values);
+                            },
+                      child: const Text("Print IN"),
+                    ),
+                    OutlinedButton(
+                      onPressed: _address.isEmpty || _loading
+                          ? null
+                          : () {
+                              var values = {
+                                1: "1234567891",
+                                2: "1234567892",
+                                3: "1234567893",
+                                4: "1234567894",
+                              };
+                              _printTemplate("Out.ZPL", values);
+                            },
+                      child: const Text("Print OUT"),
+                    ),
+                    OutlinedButton(
+                      onPressed: _address.isEmpty || _loading
+                          ? null
+                          : () {
+                              var values = {
+                                1: "1234567891",
+                                2: "1234567892",
+                                3: "1234567893",
+                                4: "1234567894",
+                                5: "1234567895",
+                              };
+                              _printTemplate("Forward.ZPL", values);
+                            },
+                      child: const Text("Print Forward"),
+                    ),
+                    OutlinedButton(
+                      onPressed: _address.isEmpty || _loading
+                          ? null
+                          : () {
+                              var values = {
+                                1: "1234567891",
+                                2: "1234567892",
+                                3: "1234567893",
+                                4: "1234567894",
+                                5: "1234567895",
+                              };
+                              _printTemplate("Dispatch.ZPL", values);
+                            },
+                      child: const Text("Print Dispatch"),
+                    )
+                  ],
+                ),
               ),
               OutlinedButton(
                 onPressed: _address.isEmpty || _loading
