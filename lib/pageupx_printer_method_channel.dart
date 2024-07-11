@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:pageupx_printer/exceptions/bluetooth_disabled_exception.dart';
 import 'package:pageupx_printer/exceptions/bluetooth_not_supported_exception.dart';

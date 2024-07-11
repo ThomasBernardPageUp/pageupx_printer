@@ -8,7 +8,6 @@ import 'package:pageupx_printer/exceptions/bluetooth_not_supported_exception.dar
 import 'package:pageupx_printer/exceptions/connection_exception.dart';
 import 'package:pageupx_printer/pageupx_printer.dart';
 import 'package:pageupx_printer_example/template.dart';
-import 'package:flutter_grid_button/flutter_grid_button.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
