@@ -236,15 +236,16 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       scaffoldMessengerKey: _scaffoldMessengerKey,
       home: Scaffold(
-        body: Column(
+          body: SafeArea(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
                 child: Column(children: [
               Container(
-                  color: Color.fromARGB(255, 1, 61, 148),
+                  color: const Color.fromARGB(255, 1, 61, 148),
                   child: Padding(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -343,7 +344,7 @@ class _MyAppState extends State<MyApp> {
             ])),
           ],
         ),
-      ),
+      )),
     );
   }
 }

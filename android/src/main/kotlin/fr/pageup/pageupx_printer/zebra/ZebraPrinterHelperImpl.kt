@@ -1,36 +1,35 @@
 package fr.pageup.pageupx_printer.zebra
 
-import android.content.Context
 import android.util.Log
 import com.zebra.sdk.comm.BluetoothConnection
+import com.zebra.sdk.printer.ZebraPrinter
 import com.zebra.sdk.printer.ZebraPrinterFactory
-import com.zebra.sdk.printer.discovery.BluetoothDiscoverer
-import com.zebra.sdk.printer.discovery.DiscoveredPrinter
-import com.zebra.sdk.printer.discovery.DiscoveryHandler
 import fr.pageup.pageupx_printer.shared.MacAddress
-import fr.pageup.pageupx_printer.shared.Printer
 import fr.pageup.pageupx_printer.shared.PrinterHelper
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.withContext
 
-class ZebraPrinterHelperImpl(
-//    private val context : Context,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
-) : PrinterHelper {
+class ZebraPrinterHelperImpl : PrinterHelper {
 
     private val blackMark = "^XA\n" + "^MNM,24\n"
     private val autoSpacer = "^XA\n" + "^MNW\n"
 
-    override suspend fun printConfiguration(address: MacAddress) {
+    private val logTag = "ZebraPrinterHelperImpl"
+
+    private suspend fun makeOperation(address: MacAddress, block : suspend ZebraPrinter.() -> Unit){
+        Log.d(logTag,"Opening connection with printer : $address")
         val connection = BluetoothConnection(address)
         connection.open()
+        Log.d(logTag,"Printer $address connected")
         val zebraPrinter = ZebraPrinterFactory.getInstance(connection)
-        zebraPrinter.printConfigurationLabel()
+        block(zebraPrinter)
         connection.close()
+        Log.d(logTag,"Connection closed with printer $address")
+    }
+
+    override suspend fun printConfiguration(address: MacAddress) {
+        makeOperation(address){
+            Log.d(logTag,"Printing configuration")
+            printConfigurationLabel()
+        }
     }
 
     override suspend fun loadTemplate(address: MacAddress, template: String) {
@@ -38,21 +37,16 @@ class ZebraPrinterHelperImpl(
     }
 
     override suspend fun loadTemplate(address: MacAddress, templates: List<String>) {
-        val connection = BluetoothConnection(address)
-        connection.open()
-        val zebraPrinter = ZebraPrinterFactory.getInstance(connection)
-        templates.forEach {
-            zebraPrinter.sendCommand(blackMark + it)
+        makeOperation(address){
+            Log.d(logTag,"Loading templates \n ${templates.joinToString { "\n" }}")
+            templates.forEach {
+                sendCommand(blackMark + it)
+            }
         }
-        connection.close()
     }
 
     override suspend fun print(address: MacAddress, template: String, values: Map<Int, String>) {
-        val connection = BluetoothConnection(address)
-        connection.open()
-        val zebraPrinter = ZebraPrinterFactory.getInstance(connection)
-        zebraPrinter.printStoredFormat(template, values)
-        connection.close()
+        print(address, template, listOf(values))
     }
 
     override suspend fun print(
@@ -60,12 +54,18 @@ class ZebraPrinterHelperImpl(
         template: String,
         values: List<Map<Int, String>>
     ) {
-        val connection = BluetoothConnection(address)
-        connection.open()
-        val zebraPrinter = ZebraPrinterFactory.getInstance(connection)
-        values.forEach { value ->
-            zebraPrinter.printStoredFormat(template, value)
+        makeOperation(address){
+            Log.d(logTag,"Printing with template $template : \n $values")
+            values.forEach { value ->
+                printStoredFormat(template, value)
+            }
         }
-        connection.close()
+    }
+
+    override suspend fun resetConfiguration(address: MacAddress) {
+        makeOperation(address){
+            Log.d(logTag,"Reseting configuration")
+            reset()
+        }
     }
 }

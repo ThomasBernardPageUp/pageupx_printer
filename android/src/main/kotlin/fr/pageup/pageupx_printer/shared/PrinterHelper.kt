@@ -1,7 +1,5 @@
 package fr.pageup.pageupx_printer.shared
 
-import kotlinx.coroutines.flow.Flow
-
 typealias MacAddress = String
 
 interface PrinterHelper {
@@ -44,4 +42,9 @@ interface PrinterHelper {
     suspend fun print(address: MacAddress, template : String, values : List<Map<Int, String>>)
 
 
+    /**
+     * Reset the current configuration of the printer
+     * @param address the mac address of the printer
+     */
+    suspend fun resetConfiguration(address: MacAddress)
 }
