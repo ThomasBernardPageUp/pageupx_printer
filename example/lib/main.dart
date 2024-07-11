@@ -122,66 +122,22 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Future<void> _printTemplate() async {
-    try {
-      _setLoading(true);
-      var values = {
-        1: "1234567890",
-        2: "1234567890",
-        3: "1234567890",
-        4: "1234567890",
-        5: "1234567890",
-      };
-      // We ca
-      await _pageupxPrinterPlugin.print(_address, "In.ZPL", values);
-    } on BluetoothNotSupportedException {
-      _showSnackBar("Bluetooth not supported");
-    } on BluetoothDisabledException {
-      _showSnackBar("Bluetooth disbled");
-    } on ConnectionException {
-      _showSnackBar("Can't connect to printer : $_address");
-    } catch (e) {
-      _showSnackBar("An error occurred");
-    } finally {
-      _setLoading(false);
-    }
+  Future<void> _printTemplate(String template, Map<int, String> values) async {
+    var values = {
+      1: "1234567890",
+      2: "1234567890",
+      3: "1234567890",
+      4: "1234567890",
+      5: "1234567890",
+    };
+    _printTemplates(template, [values]);
   }
 
-  Future<void> _printTemplates() async {
+  Future<void> _printTemplates(
+      String template, List<Map<int, String>> values) async {
     try {
       _setLoading(true);
-      var values1 = {
-        1: "1234567890",
-        2: "1234567890",
-        3: "1234567890",
-        4: "1234567890",
-        5: "1234567890",
-      };
-      var values2 = {
-        1: "2234567890",
-        2: "2234567890",
-        3: "2234567890",
-        4: "2234567890",
-        5: "2234567890",
-      };
-
-      var values3 = {
-        1: "3234567890",
-        2: "3234567890",
-        3: "3234567890",
-        4: "3234567890",
-        5: "3234567890",
-      };
-      var values4 = {
-        1: "4234567890",
-        2: "4234567890",
-        3: "4234567890",
-        4: "4234567890",
-        5: "4234567890",
-      };
-      // We ca
-      await _pageupxPrinterPlugin
-          .multiPrint(_address, "In.ZPL", [values1, values2, values3, values4]);
+      await _pageupxPrinterPlugin.multiPrint(_address, template, values);
     } on BluetoothNotSupportedException {
       _showSnackBar("Bluetooth not supported");
     } on BluetoothDisabledException {
@@ -354,13 +310,105 @@ class _MyAppState extends State<MyApp> {
                 onPressed: _address.isEmpty || _loading ? null : _loadTemplates,
                 child: const Text("Load all templates"),
               ),
-              OutlinedButton(
-                onPressed: _address.isEmpty || _loading ? null : _printTemplate,
-                child: const Text("Print template"),
+              Row(
+                children: [
+                  OutlinedButton(
+                    onPressed: _address.isEmpty || _loading
+                        ? null
+                        : () {
+                            var values = {
+                              1: "1234567891",
+                              2: "1234567892",
+                              3: "1234567893",
+                              4: "1234567894",
+                              5: "1234567895",
+                            };
+                            _printTemplate("In.ZPL", values);
+                          },
+                    child: const Text("Print IN"),
+                  ),
+                  OutlinedButton(
+                    onPressed: _address.isEmpty || _loading
+                        ? null
+                        : () {
+                            var values = {
+                              1: "1234567891",
+                              2: "1234567892",
+                              3: "1234567893",
+                              4: "1234567894",
+                            };
+                            _printTemplate("Out.ZPL", values);
+                          },
+                    child: const Text("Print OUT"),
+                  ),
+                  OutlinedButton(
+                    onPressed: _address.isEmpty || _loading
+                        ? null
+                        : () {
+                            var values = {
+                              1: "1234567891",
+                              2: "1234567892",
+                              3: "1234567893",
+                              4: "1234567894",
+                              5: "1234567895",
+                            };
+                            _printTemplate("Forward.ZPL", values);
+                          },
+                    child: const Text("Print Forward"),
+                  ),
+                  OutlinedButton(
+                    onPressed: _address.isEmpty || _loading
+                        ? null
+                        : () {
+                            var values = {
+                              1: "1234567891",
+                              2: "1234567892",
+                              3: "1234567893",
+                              4: "1234567894",
+                              5: "1234567895",
+                            };
+                            _printTemplate("Dispatch.ZPL", values);
+                          },
+                    child: const Text("Print Dispatch"),
+                  )
+                ],
               ),
               OutlinedButton(
-                onPressed:
-                    _address.isEmpty || _loading ? null : _printTemplates,
+                onPressed: _address.isEmpty || _loading
+                    ? null
+                    : () {
+                        var values1 = {
+                          1: "1234567890",
+                          2: "1234567890",
+                          3: "1234567890",
+                          4: "1234567890",
+                          5: "1234567890",
+                        };
+                        var values2 = {
+                          1: "2234567890",
+                          2: "2234567890",
+                          3: "2234567890",
+                          4: "2234567890",
+                          5: "2234567890",
+                        };
+
+                        var values3 = {
+                          1: "3234567890",
+                          2: "3234567890",
+                          3: "3234567890",
+                          4: "3234567890",
+                          5: "3234567890",
+                        };
+                        var values4 = {
+                          1: "4234567890",
+                          2: "4234567890",
+                          3: "4234567890",
+                          4: "4234567890",
+                          5: "4234567890",
+                        };
+                        _printTemplates(
+                            "In.ZPL", [values1, values2, values3, values4]);
+                      },
                 child: const Text("Print multi template"),
               ),
               OutlinedButton(
