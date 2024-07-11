@@ -69,10 +69,10 @@ class _MyAppState extends State<MyApp> {
     setState(() {});
   }
 
-  Future<void> _loadTemplate() async {
+  Future<void> _loadTemplate(String template) async {
     try {
       _setLoading(true);
-      await _pageupxPrinterPlugin.loadTemplate(_address, Template.IN);
+      await _pageupxPrinterPlugin.loadTemplate(_address, template);
     } on BluetoothNotSupportedException {
       _showSnackBar("Bluetooth not supported");
     } on BluetoothDisabledException {
@@ -80,7 +80,25 @@ class _MyAppState extends State<MyApp> {
     } on ConnectionException {
       _showSnackBar("Can't connect to printer : $_address");
     } catch (e) {
-      _showSnackBar("An error occurred");
+      _showSnackBar("An error occurred when loading template $template");
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _loadTemplates() async {
+    try {
+      _setLoading(true);
+      await _pageupxPrinterPlugin.loadTemplates(_address,
+          [Template.IN, Template.OUT, Template.FORWARD, Template.DISPATCH]);
+    } on BluetoothNotSupportedException {
+      _showSnackBar("Bluetooth not supported");
+    } on BluetoothDisabledException {
+      _showSnackBar("Bluetooth disbled");
+    } on ConnectionException {
+      _showSnackBar("Can't connect to printer : $_address");
+    } catch (e) {
+      _showSnackBar("An error occurred when loading templates");
     } finally {
       _setLoading(false);
     }
@@ -98,6 +116,54 @@ class _MyAppState extends State<MyApp> {
       };
       // We ca
       await _pageupxPrinterPlugin.print(_address, "In.ZPL", values);
+    } on BluetoothNotSupportedException {
+      _showSnackBar("Bluetooth not supported");
+    } on BluetoothDisabledException {
+      _showSnackBar("Bluetooth disbled");
+    } on ConnectionException {
+      _showSnackBar("Can't connect to printer : $_address");
+    } catch (e) {
+      _showSnackBar("An error occurred");
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _printTemplates() async {
+    try {
+      _setLoading(true);
+      var values1 = {
+        1: "1234567890",
+        2: "1234567890",
+        3: "1234567890",
+        4: "1234567890",
+        5: "1234567890",
+      };
+      var values2 = {
+        1: "2234567890",
+        2: "2234567890",
+        3: "2234567890",
+        4: "2234567890",
+        5: "2234567890",
+      };
+
+      var values3 = {
+        1: "3234567890",
+        2: "3234567890",
+        3: "3234567890",
+        4: "3234567890",
+        5: "3234567890",
+      };
+      var values4 = {
+        1: "4234567890",
+        2: "4234567890",
+        3: "4234567890",
+        4: "4234567890",
+        5: "4234567890",
+      };
+      // We ca
+      await _pageupxPrinterPlugin
+          .multiPrint(_address, "In.ZPL", [values1, values2, values3, values4]);
     } on BluetoothNotSupportedException {
       _showSnackBar("Bluetooth not supported");
     } on BluetoothDisabledException {
@@ -170,44 +236,112 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       scaffoldMessengerKey: _scaffoldMessengerKey,
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app 2'),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: GridView.count(
-                  padding: const EdgeInsets.all(20),
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  crossAxisCount: 2,
-                  children: [
-                    OutlinedButton(
-                      onPressed:
-                          _address.isEmpty || _loading ? null : _loadTemplate,
-                      child: const Text("Load template"),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+                child: Column(children: [
+              Container(
+                  color: Color.fromARGB(255, 1, 61, 148),
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Connected printer : $_address",
+                          style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
+                        ),
+                        const Text(
+                          "Click on the button `Start scanning` to find a printer with NFC",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        Row(
+                          children: [
+                            TextButton(
+                              onPressed: _scanning ? null : _startNfcScan,
+                              child: Text("Start scanning",
+                                  style: _scanning
+                                      ? null
+                                      : const TextStyle(color: Colors.white)),
+                            ),
+                            TextButton(
+                              onPressed: !_scanning ? null : _stopNfcScan,
+                              child: Text(
+                                "Stop scanning",
+                                style: _scanning
+                                    ? const TextStyle(color: Colors.white)
+                                    : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    OutlinedButton(
-                      onPressed:
-                          _address.isEmpty || _loading ? null : _printTemplate,
-                      child: const Text("Print template"),
-                    ),
-                    OutlinedButton(
-                      onPressed: _scanning ? null : _startNfcScan,
-                      child: const Text("Start Scan printer with NFC"),
-                    ),
-                    OutlinedButton(
-                      onPressed: !_scanning ? null : _stopNfcScan,
-                      child: const Text("Stop NFC"),
-                    ),
-                  ],
+                  )),
+              if (_loading)
+                const LinearProgressIndicator(
+                  color: Color.fromARGB(255, 54, 138, 206),
                 ),
+              if (!_loading)
+                Container(
+                  height: 4,
+                  color: Colors.transparent,
+                ),
+              OutlinedButton(
+                onPressed: _address.isEmpty || _loading
+                    ? null
+                    : () {
+                        _loadTemplate(Template.IN);
+                      },
+                child: const Text("Load template IN"),
               ),
-              Text("Current printer: $_address"),
-            ],
-          ),
+              OutlinedButton(
+                onPressed: _address.isEmpty || _loading
+                    ? null
+                    : () {
+                        _loadTemplate(Template.OUT);
+                      },
+                child: const Text("Load template OUT"),
+              ),
+              OutlinedButton(
+                onPressed: _address.isEmpty || _loading
+                    ? null
+                    : () {
+                        _loadTemplate(Template.DISPATCH);
+                      },
+                child: const Text("Load template DISPATCH"),
+              ),
+              OutlinedButton(
+                onPressed: _address.isEmpty || _loading
+                    ? null
+                    : () {
+                        _loadTemplate(Template.FORWARD);
+                      },
+                child: const Text("Load template FORWARD"),
+              ),
+              OutlinedButton(
+                onPressed: _address.isEmpty || _loading ? null : _loadTemplates,
+                child: const Text("Load all templates"),
+              ),
+              OutlinedButton(
+                onPressed: _address.isEmpty || _loading ? null : _printTemplate,
+                child: const Text("Print template"),
+              ),
+              OutlinedButton(
+                onPressed:
+                    _address.isEmpty || _loading ? null : _printTemplates,
+                child: const Text("Print multi template"),
+              ),
+              OutlinedButton(
+                onPressed: _address.isEmpty || _loading ? null : _loadTemplates,
+                child: const Text("Load multi templates"),
+              )
+            ])),
+          ],
         ),
       ),
     );

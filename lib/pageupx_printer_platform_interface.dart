@@ -31,8 +31,17 @@ abstract class PageupxPrinterPlatform extends PlatformInterface {
     throw UnimplementedError('loadTemplate() has not been implemented.');
   }
 
+  Future loadTemplates(String macAddress, List<String> templates) async {
+    throw UnimplementedError('loadTemplates() has not been implemented.');
+  }
+
   Future print(
       String macAddress, String templateName, Map<int, String> values) async {
     throw UnimplementedError('print() has not been implemented.');
+  }
+
+  Future multiPrint(String macAddress, String templateName,
+      List<Map<int, String>> values) async {
+    throw UnimplementedError('multiPrint() has not been implemented.');
   }
 }

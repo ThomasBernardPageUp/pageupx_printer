@@ -25,30 +25,6 @@ class ZebraPrinterHelperImpl(
     private val blackMark = "^XA\n" + "^MNM,24\n"
     private val autoSpacer = "^XA\n" + "^MNW\n"
 
-
-
-    override fun getPrinters() : Flow<List<Printer>> = callbackFlow {
-//        BluetoothDiscoverer.findPrinters(context, object : DiscoveryHandler {
-//            val discoveredPrinters: MutableList<DiscoveredPrinter> = mutableListOf()
-//            override fun foundPrinter(printer: DiscoveredPrinter) {
-//                Log.i("ZebraPrinterHelperImpl", "Found printer : $printer")
-//                discoveredPrinters.add(printer)
-//            }
-//
-//            override fun discoveryFinished() {
-//                for (printer in discoveredPrinters) {
-//                    Log.i("ZebraPrinterHelperImpl", "Discovered printer : $printer")
-//                }
-//                trySend(discoveredPrinters.map { Printer(it.address) })
-//            }
-//
-//            override fun discoveryError(message: String) {
-//                Log.e("ZebraPrinterHelperImpl", "An error occurred during discovery : $message")
-//            }
-//        })
-        awaitClose()
-    }
-
     override suspend fun printConfiguration(address: MacAddress) {
         val connection = BluetoothConnection(address)
         connection.open()
@@ -58,10 +34,16 @@ class ZebraPrinterHelperImpl(
     }
 
     override suspend fun loadTemplate(address: MacAddress, template: String) {
+        loadTemplate(address = address, templates = listOf(template))
+    }
+
+    override suspend fun loadTemplate(address: MacAddress, templates: List<String>) {
         val connection = BluetoothConnection(address)
         connection.open()
         val zebraPrinter = ZebraPrinterFactory.getInstance(connection)
-        zebraPrinter.sendCommand(blackMark + template)
+        templates.forEach {
+            zebraPrinter.sendCommand(blackMark + it)
+        }
         connection.close()
     }
 
@@ -70,6 +52,20 @@ class ZebraPrinterHelperImpl(
         connection.open()
         val zebraPrinter = ZebraPrinterFactory.getInstance(connection)
         zebraPrinter.printStoredFormat(template, values)
+        connection.close()
+    }
+
+    override suspend fun print(
+        address: MacAddress,
+        template: String,
+        values: List<Map<Int, String>>
+    ) {
+        val connection = BluetoothConnection(address)
+        connection.open()
+        val zebraPrinter = ZebraPrinterFactory.getInstance(connection)
+        values.forEach { value ->
+            zebraPrinter.printStoredFormat(template, value)
+        }
         connection.close()
     }
 }

@@ -9,9 +9,19 @@ class PageupxPrinter {
     await PageupxPrinterPlatform.instance.loadTemplate(macAddress, template);
   }
 
+  Future loadTemplates(String macAddress, List<String> templates) async {
+    await PageupxPrinterPlatform.instance.loadTemplates(macAddress, templates);
+  }
+
   Future print(
       String macAddress, String templateName, Map<int, String> values) async {
     await PageupxPrinterPlatform.instance
         .print(macAddress, templateName, values);
+  }
+
+  Future multiPrint(String macAddress, String templateName,
+      List<Map<int, String>> values) async {
+    await PageupxPrinterPlatform.instance
+        .multiPrint(macAddress, templateName, values);
   }
 }

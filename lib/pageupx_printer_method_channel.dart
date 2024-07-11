@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:pageupx_printer/exceptions/bluetooth_disabled_exception.dart';
 import 'package:pageupx_printer/exceptions/bluetooth_not_supported_exception.dart';
@@ -14,6 +15,7 @@ class MethodChannelPageupxPrinter extends PageupxPrinterPlatform {
 
   final _macAddressParameter = "mac_address";
   final _templateParameter = "template";
+  final _templatesParameter = "templates";
   final _templateNameParameter = "template_name";
   final _valuesParameter = "values";
 
@@ -50,9 +52,29 @@ class MethodChannelPageupxPrinter extends PageupxPrinterPlatform {
   }
 
   @override
+  Future loadTemplates(String macAddress, List<String> templates) async {
+    var result = await methodChannel.invokeMethod<int>("load_templates",
+        {_macAddressParameter: macAddress, _templatesParameter: templates});
+
+    parseResult(result!);
+  }
+
+  @override
   Future print(
       String macAddress, String templateName, Map<int, String> values) async {
     var result = await methodChannel.invokeMethod<int>("print", {
+      _macAddressParameter: macAddress,
+      _templateNameParameter: templateName,
+      _valuesParameter: values
+    });
+
+    parseResult(result!);
+  }
+
+  @override
+  Future multiPrint(String macAddress, String templateName,
+      List<Map<int, String>> values) async {
+    var result = await methodChannel.invokeMethod<int>("print_multi", {
       _macAddressParameter: macAddress,
       _templateNameParameter: templateName,
       _valuesParameter: values
