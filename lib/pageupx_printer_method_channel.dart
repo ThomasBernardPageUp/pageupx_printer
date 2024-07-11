@@ -82,4 +82,13 @@ class MethodChannelPageupxPrinter extends PageupxPrinterPlatform {
 
     parseResult(result!);
   }
+
+  @override
+  Future reset(String macAddress) async {
+    var result = await methodChannel.invokeMethod<int>("reset", {
+      _macAddressParameter: macAddress,
+    });
+
+    parseResult(result!);
+  }
 }

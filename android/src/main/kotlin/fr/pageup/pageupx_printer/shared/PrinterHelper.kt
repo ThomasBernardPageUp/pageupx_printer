@@ -46,5 +46,5 @@ interface PrinterHelper {
      * Reset the current configuration of the printer
      * @param address the mac address of the printer
      */
-    suspend fun resetConfiguration(address: MacAddress)
+    suspend fun reset(address: MacAddress)
 }

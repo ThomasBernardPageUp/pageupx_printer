@@ -44,4 +44,8 @@ abstract class PageupxPrinterPlatform extends PlatformInterface {
       List<Map<int, String>> values) async {
     throw UnimplementedError('multiPrint() has not been implemented.');
   }
+
+  Future reset(String macAddress) async {
+    throw UnimplementedError('reset() has not been implemented.');
+  }
 }

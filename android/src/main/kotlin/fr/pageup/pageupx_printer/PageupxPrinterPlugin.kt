@@ -53,36 +53,46 @@ class PageupxPrinterPlugin: FlutterPlugin, MethodCallHandler {
                 else if (!mBluetoothAdapter.isEnabled)
                     throw BluetoothNotSupportedException()
 
-                if (call.method == "print_configuration"){
-                    val macAddress = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
-                    printerHelper.printConfiguration(macAddress)
-                    result.success(-1)
-                }
-                else if (call.method == "load_template"){
-                    val macAddress : String = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
-                    val template : String = call.argument<String>(templateParameter) ?: throw NullPointerException(templateParameter)
-                    printerHelper.loadTemplate(macAddress, template)
-                    result.success(-1)
-                }
-                else if (call.method == "load_templates"){
-                    val macAddress : String = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
-                    val templates : List<String> = call.argument<List<String>>(templatesParameter) ?: throw NullPointerException(templateParameter)
-                    printerHelper.loadTemplate(macAddress, templates)
-                    result.success(-1)
-                }
-                else if (call.method == "print"){
-                    val macAddress : String = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
-                    val templateName : String= call.argument<String>(templateNameParameter) ?: throw NullPointerException(templateNameParameter)
-                    val values : Map<Int, String> = call.argument<Map<Int, String>>(valuesParameter) ?: throw NullPointerException(valuesParameter)
-                    printerHelper.print(macAddress, templateName, values)
-                    result.success(-1)
-                }
-                else if (call.method == "print_multi"){
-                    val macAddress : String = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
-                    val templateName : String = call.argument<String>(templateNameParameter) ?: throw NullPointerException(templateNameParameter)
-                    val values : List<Map<Int, String>> = call.argument<List<Map<Int, String>>>(valuesParameter) ?: throw NullPointerException(valuesParameter)
-                    printerHelper.print(macAddress, templateName, values)
-                    result.success(-1)
+                when (call.method) {
+                    "print_configuration" -> {
+                        val macAddress = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
+                        printerHelper.printConfiguration(macAddress)
+                        result.success(-1)
+                    }
+                    "load_template" -> {
+                        val macAddress : String = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
+                        val template : String = call.argument<String>(templateParameter) ?: throw NullPointerException(templateParameter)
+                        printerHelper.loadTemplate(macAddress, template)
+                        result.success(-1)
+                    }
+                    "load_templates" -> {
+                        val macAddress : String = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
+                        val templates : List<String> = call.argument<List<String>>(templatesParameter) ?: throw NullPointerException(templateParameter)
+                        printerHelper.loadTemplate(macAddress, templates)
+                        result.success(-1)
+                    }
+                    "print" -> {
+                        val macAddress : String = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
+                        val templateName : String= call.argument<String>(templateNameParameter) ?: throw NullPointerException(templateNameParameter)
+                        val values : Map<Int, String> = call.argument<Map<Int, String>>(valuesParameter) ?: throw NullPointerException(valuesParameter)
+                        printerHelper.print(macAddress, templateName, values)
+                        result.success(-1)
+                    }
+                    "print_multi" -> {
+                        val macAddress : String = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
+                        val templateName : String = call.argument<String>(templateNameParameter) ?: throw NullPointerException(templateNameParameter)
+                        val values : List<Map<Int, String>> = call.argument<List<Map<Int, String>>>(valuesParameter) ?: throw NullPointerException(valuesParameter)
+                        printerHelper.print(macAddress, templateName, values)
+                        result.success(-1)
+                    }
+                    "reset" -> {
+                        val macAddress : String = call.argument<String>(macAddressParameter) ?: throw NullPointerException(macAddressParameter)
+                        printerHelper.reset(macAddress)
+                        result.success(-1)
+                    }
+                    else -> {
+                        result.notImplemented()
+                    }
                 }
             }
 

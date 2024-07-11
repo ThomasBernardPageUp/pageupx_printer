@@ -62,7 +62,7 @@ class ZebraPrinterHelperImpl : PrinterHelper {
         }
     }
 
-    override suspend fun resetConfiguration(address: MacAddress) {
+    override suspend fun reset(address: MacAddress) {
         makeOperation(address){
             Log.d(logTag,"Reseting configuration")
             reset()

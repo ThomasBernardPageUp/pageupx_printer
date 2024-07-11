@@ -24,4 +24,8 @@ class PageupxPrinter {
     await PageupxPrinterPlatform.instance
         .multiPrint(macAddress, templateName, values);
   }
+
+  Future reset(String macAddress) async {
+    await PageupxPrinterPlatform.instance.reset(macAddress);
+  }
 }

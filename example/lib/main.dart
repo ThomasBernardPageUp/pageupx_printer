@@ -8,6 +8,7 @@ import 'package:pageupx_printer/exceptions/bluetooth_not_supported_exception.dar
 import 'package:pageupx_printer/exceptions/connection_exception.dart';
 import 'package:pageupx_printer/pageupx_printer.dart';
 import 'package:pageupx_printer_example/template.dart';
+import 'package:flutter_grid_button/flutter_grid_button.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -81,6 +82,23 @@ class _MyAppState extends State<MyApp> {
       _showSnackBar("Can't connect to printer : $_address");
     } catch (e) {
       _showSnackBar("An error occurred when loading template $template");
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _reset() async {
+    try {
+      _setLoading(true);
+      await _pageupxPrinterPlugin.reset(_address);
+    } on BluetoothNotSupportedException {
+      _showSnackBar("Bluetooth not supported");
+    } on BluetoothDisabledException {
+      _showSnackBar("Bluetooth disbled");
+    } on ConnectionException {
+      _showSnackBar("Can't connect to printer : $_address");
+    } catch (e) {
+      _showSnackBar("An error occurred when reseting printer $_address");
     } finally {
       _setLoading(false);
     }
@@ -292,37 +310,45 @@ class _MyAppState extends State<MyApp> {
                   height: 4,
                   color: Colors.transparent,
                 ),
-              OutlinedButton(
-                onPressed: _address.isEmpty || _loading
-                    ? null
-                    : () {
-                        _loadTemplate(Template.IN);
-                      },
-                child: const Text("Load template IN"),
+              Row(
+                children: [
+                  OutlinedButton(
+                    onPressed: _address.isEmpty || _loading
+                        ? null
+                        : () {
+                            _loadTemplate(Template.IN);
+                          },
+                    child: const Text("Load template IN"),
+                  ),
+                  OutlinedButton(
+                    onPressed: _address.isEmpty || _loading
+                        ? null
+                        : () {
+                            _loadTemplate(Template.OUT);
+                          },
+                    child: const Text("Load template OUT"),
+                  ),
+                ],
               ),
-              OutlinedButton(
-                onPressed: _address.isEmpty || _loading
-                    ? null
-                    : () {
-                        _loadTemplate(Template.OUT);
-                      },
-                child: const Text("Load template OUT"),
-              ),
-              OutlinedButton(
-                onPressed: _address.isEmpty || _loading
-                    ? null
-                    : () {
-                        _loadTemplate(Template.DISPATCH);
-                      },
-                child: const Text("Load template DISPATCH"),
-              ),
-              OutlinedButton(
-                onPressed: _address.isEmpty || _loading
-                    ? null
-                    : () {
-                        _loadTemplate(Template.FORWARD);
-                      },
-                child: const Text("Load template FORWARD"),
+              Row(
+                children: [
+                  OutlinedButton(
+                    onPressed: _address.isEmpty || _loading
+                        ? null
+                        : () {
+                            _loadTemplate(Template.DISPATCH);
+                          },
+                    child: const Text("Load template DISPATCH"),
+                  ),
+                  OutlinedButton(
+                    onPressed: _address.isEmpty || _loading
+                        ? null
+                        : () {
+                            _loadTemplate(Template.FORWARD);
+                          },
+                    child: const Text("Load template FORWARD"),
+                  ),
+                ],
               ),
               OutlinedButton(
                 onPressed: _address.isEmpty || _loading ? null : _loadTemplates,
@@ -338,8 +364,8 @@ class _MyAppState extends State<MyApp> {
                 child: const Text("Print multi template"),
               ),
               OutlinedButton(
-                onPressed: _address.isEmpty || _loading ? null : _loadTemplates,
-                child: const Text("Load multi templates"),
+                onPressed: _address.isEmpty || _loading ? null : _reset,
+                child: const Text("Reset printer"),
               )
             ])),
           ],
